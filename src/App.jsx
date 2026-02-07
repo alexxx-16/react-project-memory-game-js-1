@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "./components/Card";
 import { ScoredBoard } from "./components/ScoreBoard";
+import { Button } from "./components/Button";
 
 const emojis = ["🐶", "🐱", "🦁", "🐯", "🐼", "🐨", "🐙", "🦊"];
 
@@ -34,10 +35,6 @@ const App = () => {
     setMoves(0);
     setClickDisabled(false);
   };
-
-  useEffect(() => {
-    initialiseGame();
-  }, []);
 
   const nextRound = () => {
     setChoiceOne(null);
@@ -92,8 +89,10 @@ const App = () => {
     }
   }, [choiceOne, choiceTwo]);
 
+  const isGameWon = score === emojis.length;
+
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-zinc-800 py-4">
+    <div className="relative flex min-h-screen w-full flex-col items-center bg-zinc-800 py-4">
       <ScoredBoard score={score} moves={moves} restartGame={initialiseGame} />
       <div className="grid w-full max-w-lg grid-cols-4 grid-rows-4 gap-4 p-4">
         {cards.map((card) => (
@@ -105,6 +104,14 @@ const App = () => {
           />
         ))}
       </div>
+      {isGameWon && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 bg-zinc-950/60 backdrop-blur-sm">
+          <h1 className="text-6xl font-semibold text-teal-400">You Won!</h1>
+          <p className="text-3xl text-pink-400">It took you {moves} moves.</p>
+
+          <Button onClick={initialiseGame}>Play Again</Button>
+        </div>
+      )}
     </div>
   );
 };

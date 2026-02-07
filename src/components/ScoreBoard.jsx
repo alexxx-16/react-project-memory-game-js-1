@@ -1,3 +1,5 @@
+import { Button } from "./Button";
+
 export const ScoredBoard = ({ score, moves, restartGame }) => {
   return (
     <div className="flex w-full flex-col items-center justify-center gap-2 p-4">
@@ -20,12 +22,7 @@ export const ScoredBoard = ({ score, moves, restartGame }) => {
           </span>
         </p>
       </div>
-      <button
-        onClick={restartGame}
-        className="rounded-xl border-2 border-teal-400 px-2 py-1 text-xl text-white transition-all duration-200 hover:border-teal-200 hover:text-teal-200 hover:shadow-[0_0_15px_rgba(45,212,191,0.6)] active:scale-95"
-      >
-        New Game
-      </button>
+      <Button onClick={restartGame}>Restart</Button>
     </div>
   );
 };
