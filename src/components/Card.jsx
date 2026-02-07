@@ -1,8 +1,8 @@
-export const Card = ({ card, handleChoice, flipped }) => {
+export const Card = ({ card, flipped, handleChoice }) => {
   return (
     <div
-      className="flex aspect-square items-center justify-center rounded-xl bg-zinc-700 p-4 text-4xl transition-all duration-200 hover:bg-zinc-600 active:scale-95"
-      onClick={handleChoice}
+      onClick={() => handleChoice(card)}
+      className="flex aspect-square items-center justify-center rounded-xl bg-zinc-700 p-4 text-4xl font-bold text-pink-400 hover:border-2 hover:border-teal-400 active:scale-95"
     >
       {flipped ? card.emoji : "?"}
     </div>

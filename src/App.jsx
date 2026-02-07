@@ -1,105 +1,107 @@
 import { useEffect, useState } from "react";
 import { Card } from "./components/Card";
+import { ScoredBoard } from "./components/ScoreBoard";
 
-const emojis = ["🍌", "🥝", "🍋", "🍓", "🥥", "🍇", "🫐", "🍉"];
+const emojis = ["🐶", "🐱", "🦁", "🐯", "🐼", "🐨", "🐙", "🦊"];
 
-const createDeck = () => {
-  const deck = [...emojis, ...emojis] // double the emojis
-    .sort(
-      () => Math.random() - 0.5, // shuffle Fisher & Yates
-    )
+const generateDeck = () => {
+  const shuffledDeck = [...emojis, ...emojis]
+    .sort(() => Math.random() - 0.5)
     .map((emoji, index) => ({
       id: index,
       emoji,
       isFlipped: false,
-      isMatched: false, //define each objects
+      isMatched: false,
     }));
-
-  return deck;
+  return shuffledDeck;
 };
 
 const App = () => {
-  const [cards, setCards] = useState(createDeck());
+  const [cards, setCards] = useState(generateDeck());
+  const [choiceOne, setChoiceOne] = useState(null);
+  const [choiceTwo, setChoiceTwo] = useState(null);
 
-  const [choiceA, setChoiceA] = useState(null);
-  const [choiceB, setChoiceB] = useState(null);
-  const [disabled, setDisabled] = useState(false); // user can click on cards
-
-  const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
+  const [score, setScore] = useState(0);
 
-  // user clicks on a card
+  const [clickDisabled, setClickDisabled] = useState(false);
+
+  const initialiseGame = () => {
+    setCards(generateDeck());
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setScore(0);
+    setMoves(0);
+    setClickDisabled(false);
+  };
+
+  useEffect(() => {
+    initialiseGame();
+  }, []);
+
+  const nextRound = () => {
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setMoves((prev) => prev + 1);
+    setClickDisabled(false);
+  };
+
+  // when user clicks on a card
   const handleChoice = (card) => {
-    if (disabled || card.isFlipped || card.isMatched) return;
-
-    // flip the chosen card
+    // choice not valid
+    if (clickDisabled || card.isFlipped || card.isMatched) return;
+    // choice is valid, set ifFlipped to true
     setCards((prev) =>
       prev.map((c) => (c.id === card.id ? { ...c, isFlipped: true } : c)),
     );
-
-    choiceA ? setChoiceB(card) : setChoiceA(card);
+    // choice one or choice two
+    choiceOne ? setChoiceTwo(card) : setChoiceOne(card);
   };
 
-  const restartGame = () => {
-    setCards(createDeck());
-    setChoiceA(null);
-    setChoiceB(null);
-    setDisabled(false);
-    setScore(0);
-    setMoves(0);
-  };
-
-  const resetTurn = () => {
-    setChoiceA(null);
-    setChoiceB(null);
-    setDisabled(false);
-  };
-
-  // compare 2 cards
+  // compare two cards
   useEffect(() => {
-    if (choiceA && choiceB) {
-      setDisabled(true); // cant click any more after picking 2 cards
-      setMoves((prev) => prev + 1);
+    // user picked 2 cards, cant click on other cards while calculating
+    if (choiceOne && choiceTwo) {
+      setClickDisabled(true);
 
-      //cards match
-      if (choiceA.emoji === choiceB.emoji) {
+      //match
+      if (choiceOne.emoji === choiceTwo.emoji) {
         setCards((prev) =>
           prev.map((card) =>
-            card.emoji === choiceA.emoji ? { ...card, isMatched: true } : card,
+            card.emoji === choiceOne.emoji
+              ? { ...card, isMatched: true }
+              : card,
           ),
         );
         setScore((prev) => prev + 1);
-        resetTurn();
+        nextRound();
       }
-      //cards dont match
+      //no match, change flipped to false
       else {
         setTimeout(() => {
           setCards((prev) =>
             prev.map((card) =>
-              card.id === choiceA.id || card.id === choiceB.id
+              card.id === choiceOne.id || card.id === choiceTwo.id
                 ? { ...card, isFlipped: false }
                 : card,
             ),
           );
-          resetTurn();
-        }, 500);
+          nextRound();
+        }, 800);
       }
     }
-  }, [choiceA, choiceB]);
+  }, [choiceOne, choiceTwo]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-900 text-white">
-      <h1 className="px-4 text-4xl font-bold text-purple-400">Memory Game</h1>
-      <p>Score: {score}</p>
-      <p>Moves: {moves}</p>
-      <button onClick={restartGame}>New Game</button>
-      <div className="grid grid-cols-4 grid-rows-4 gap-4">
+    <div className="flex min-h-screen w-full flex-col items-center bg-zinc-800 py-4">
+      <ScoredBoard score={score} moves={moves} restartGame={initialiseGame} />
+      <div className="grid w-full max-w-lg grid-cols-4 grid-rows-4 gap-4 p-4">
         {cards.map((card) => (
           <Card
             key={card.id}
             card={card}
-            handleChoice={() => handleChoice(card)}
             flipped={card.isFlipped || card.isMatched}
+            handleChoice={handleChoice}
           />
         ))}
       </div>
